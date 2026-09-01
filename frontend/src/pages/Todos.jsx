@@ -23,6 +23,15 @@ function Todos() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [filter, setFilter] = useState('all'); // 'all' | 'active' | 'completed'
+  const [notification, setNotification] = useState(null); // { message, type }
+
+  // Helper to trigger temporary alert notification
+  const showNotification = (message, type = 'success') => {
+    setNotification({ message, type });
+    setTimeout(() => {
+      setNotification((current) => (current && current.message === message ? null : current));
+    }, 3000);
+  };
 
   // Fetch all todos from the backend API
   const fetchTodos = async () => {
@@ -70,6 +79,7 @@ function Todos() {
 
       const createdTodo = await response.json();
       setTodos((prevTodos) => [...(Array.isArray(prevTodos) ? prevTodos : []), createdTodo]);
+      showNotification('Todo created successfully!', 'success');
     } catch (err) {
       alert('Error creating todo. Please try again.');
     }
@@ -94,6 +104,12 @@ function Todos() {
       setTodos((prevTodos) =>
         (Array.isArray(prevTodos) ? prevTodos : []).map((todo) => (todo.id === id ? updatedTodo : todo))
       );
+
+      if (!currentCompleted) {
+        showNotification('Todo marked as completed!', 'success');
+      } else {
+        showNotification('Todo marked as active!', 'info');
+      }
     } catch (err) {
       alert('Error updating todo. Please try again.');
     }
@@ -114,6 +130,7 @@ function Todos() {
       }
 
       setTodos((prevTodos) => (Array.isArray(prevTodos) ? prevTodos : []).filter((todo) => todo.id !== id));
+      showNotification('Todo deleted successfully!', 'danger');
     } catch (err) {
       alert('Error deleting todo. Please try again.');
     }
@@ -137,6 +154,26 @@ function Todos() {
         </div>
         <p className="page-subtitle">Organize and track your daily tasks</p>
       </header>
+
+      {/* Action Notification Alert */}
+      {notification && (
+        <div className={`notification-toast toast-${notification.type}`}>
+          <div className="toast-content">
+            <span className="toast-icon">
+              {notification.type === 'success' ? '✓' : notification.type === 'danger' ? '✕' : 'ℹ'}
+            </span>
+            <span className="toast-text">{notification.message}</span>
+          </div>
+          <button
+            type="button"
+            className="toast-close"
+            onClick={() => setNotification(null)}
+            aria-label="Close notification"
+          >
+            ×
+          </button>
+        </div>
+      )}
 
       {/* Todo Creation Form */}
       <section className="card form-card">
