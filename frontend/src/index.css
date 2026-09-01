@@ -1,15 +1,18 @@
 /* ==========================================================================
-   Base Styles & Reset
+   Base Styles & Reset - White & Light Green Theme
    ========================================================================== */
 :root {
-  --primary: #4f46e5;
-  --primary-hover: #4338ca;
-  --bg-app: #f8fafc;
+  --primary: #10b981;
+  --primary-hover: #059669;
+  --primary-dark: #047857;
+  --primary-light: #ecfdf5;
+  --primary-soft: #d1fae5;
+  --bg-app: #f2f8f4;
   --bg-card: #ffffff;
-  --text-main: #0f172a;
-  --text-muted: #64748b;
-  --border: #e2e8f0;
-  --border-focus: #818cf8;
+  --text-main: #0f291e;
+  --text-muted: #4b7264;
+  --border: #d4e7db;
+  --border-focus: #10b981;
   --success: #10b981;
   --success-bg: #ecfdf5;
   --success-text: #047857;
@@ -19,11 +22,11 @@
   --danger: #ef4444;
   --danger-hover: #dc2626;
   --danger-bg: #fef2f2;
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 14px;
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --shadow-sm: 0 1px 3px rgba(15, 41, 30, 0.05);
+  --shadow-md: 0 4px 8px -2px rgba(15, 41, 30, 0.08), 0 2px 4px -2px rgba(15, 41, 30, 0.04);
   --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
 
@@ -39,25 +42,25 @@ body {
   color: var(--text-main);
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
-  padding: 2rem 1rem;
+  padding: 2.5rem 1rem;
 }
 
 /* ==========================================================================
    Layout
    ========================================================================== */
 .app-container {
-  max-width: 640px;
+  max-width: 650px;
   margin: 0 auto;
   padding: 0 0.5rem;
 }
 
 .page-header {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.75rem;
   text-align: center;
 }
 
 .page-header h1 {
-  font-size: 2rem;
+  font-size: 2.25rem;
   font-weight: 700;
   color: var(--text-main);
   letter-spacing: -0.02em;
@@ -66,7 +69,7 @@ body {
 .page-subtitle {
   color: var(--text-muted);
   font-size: 0.95rem;
-  margin-top: 0.25rem;
+  margin-top: 0.35rem;
 }
 
 /* ==========================================================================
@@ -106,26 +109,26 @@ body {
 .form-input,
 .form-textarea {
   width: 100%;
-  padding: 0.65rem 0.85rem;
+  padding: 0.7rem 0.9rem;
   font-size: 0.95rem;
   font-family: inherit;
-  border: 1px solid var(--border);
+  border: 1.5px solid var(--border);
   border-radius: var(--radius-sm);
-  background-color: #fff;
+  background-color: #ffffff;
   color: var(--text-main);
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .form-input:focus,
 .form-textarea:focus {
   outline: none;
   border-color: var(--border-focus);
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.18);
 }
 
 .form-textarea {
   resize: vertical;
-  min-height: 70px;
+  min-height: 75px;
 }
 
 .form-error {
@@ -146,7 +149,7 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0.5rem 1rem;
+  padding: 0.55rem 1.05rem;
   font-size: 0.875rem;
   font-weight: 600;
   font-family: inherit;
@@ -159,31 +162,34 @@ body {
 
 .btn-primary {
   background-color: var(--primary);
-  color: #fff;
+  color: #ffffff;
+  border: 1px solid var(--primary-dark);
 }
 
 .btn-primary:hover {
   background-color: var(--primary-hover);
+  box-shadow: 0 2px 4px rgba(16, 185, 129, 0.25);
 }
 
 .btn-secondary {
-  background-color: #f1f5f9;
-  color: var(--text-main);
-  border-color: var(--border);
+  background-color: var(--primary-light);
+  color: var(--primary-dark);
+  border-color: var(--primary-soft);
 }
 
 .btn-secondary:hover {
-  background-color: #e2e8f0;
+  background-color: var(--primary-soft);
+  color: var(--text-main);
 }
 
 .btn-complete {
-  background-color: #f0fdf4;
-  color: var(--success-text);
-  border-color: #bbf7d0;
+  background-color: var(--primary-light);
+  color: var(--primary-dark);
+  border-color: #a7f3d0;
 }
 
 .btn-complete:hover {
-  background-color: #dcfce7;
+  background-color: var(--primary-soft);
 }
 
 .btn-undo {
@@ -197,14 +203,14 @@ body {
 }
 
 .btn-view {
-  background-color: #f8fafc;
-  color: var(--primary);
-  border-color: #cbd5e1;
+  background-color: #f6fbf8;
+  color: var(--primary-dark);
+  border-color: var(--border);
 }
 
 .btn-view:hover {
-  background-color: #ede9fe;
-  border-color: #c7d2fe;
+  background-color: var(--primary-light);
+  border-color: var(--primary-soft);
 }
 
 .btn-delete {
@@ -219,20 +225,21 @@ body {
 }
 
 /* ==========================================================================
-   Filter Tabs
+   Filter Tabs (White & Light Green Pill Style)
    ========================================================================== */
 .filters-container {
   display: flex;
   gap: 0.5rem;
   margin-bottom: 1.25rem;
-  background-color: #e2e8f0;
-  padding: 0.3rem;
-  border-radius: var(--radius-sm);
+  background-color: #e3efe7;
+  padding: 0.35rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
 }
 
 .filter-btn {
   flex: 1;
-  padding: 0.45rem 0.75rem;
+  padding: 0.5rem 0.85rem;
   font-size: 0.875rem;
   font-weight: 600;
   font-family: inherit;
@@ -241,7 +248,7 @@ body {
   color: var(--text-muted);
   border-radius: var(--radius-sm);
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all 0.2s ease;
 }
 
 .filter-btn:hover {
@@ -249,9 +256,9 @@ body {
 }
 
 .filter-btn.active {
-  background-color: #fff;
-  color: var(--primary);
-  box-shadow: var(--shadow-sm);
+  background-color: #ffffff;
+  color: var(--primary-dark);
+  box-shadow: 0 2px 4px rgba(15, 41, 30, 0.08);
 }
 
 /* ==========================================================================
@@ -260,50 +267,52 @@ body {
 .todos-list {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.85rem;
 }
 
 .todo-card {
   background: var(--bg-card);
-  border: 1px solid var(--border);
+  border: 1.5px solid var(--border);
   border-radius: var(--radius-md);
-  padding: 1.15rem;
+  padding: 1.25rem;
   box-shadow: var(--shadow-sm);
   display: flex;
   flex-direction: column;
-  gap: 0.85rem;
-  transition: transform 0.1s ease, box-shadow 0.1s ease;
+  gap: 0.9rem;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
 }
 
 .todo-card:hover {
+  border-color: #a7f3d0;
   box-shadow: var(--shadow-md);
 }
 
 .todo-card.completed {
-  background-color: #fcfcfc;
-  border-color: #e5e7eb;
+  background-color: #fafdfb;
+  border-color: #e5eee8;
+  opacity: 0.85;
 }
 
 .todo-card.completed .todo-title {
   text-decoration: line-through;
-  color: var(--text-muted);
+  color: #7b9e90;
 }
 
 .todo-card.completed .todo-description {
-  color: #94a3b8;
+  color: #9cb8ad;
 }
 
 .todo-title {
-  font-size: 1.1rem;
+  font-size: 1.15rem;
   font-weight: 600;
   color: var(--text-main);
   word-break: break-word;
 }
 
 .todo-description {
-  font-size: 0.9rem;
+  font-size: 0.92rem;
   color: var(--text-muted);
-  margin-top: 0.25rem;
+  margin-top: 0.3rem;
   white-space: pre-wrap;
   word-break: break-word;
 }
@@ -315,29 +324,31 @@ body {
 .status-badge {
   display: inline-block;
   font-size: 0.75rem;
-  font-weight: 600;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  padding: 0.2rem 0.55rem;
+  padding: 0.25rem 0.65rem;
   border-radius: 9999px;
 }
 
 .badge-active {
-  background-color: #e0e7ff;
-  color: #4338ca;
+  background-color: #eafaf1;
+  color: var(--primary-dark);
+  border: 1px solid #bbf7d0;
 }
 
 .badge-completed {
   background-color: var(--success-bg);
   color: var(--success-text);
+  border: 1px solid #a7f3d0;
 }
 
 .todo-actions {
   display: flex;
   gap: 0.5rem;
   flex-wrap: wrap;
-  padding-top: 0.5rem;
-  border-top: 1px solid #f1f5f9;
+  padding-top: 0.65rem;
+  border-top: 1px solid #eef6f1;
 }
 
 /* ==========================================================================
@@ -346,7 +357,7 @@ body {
 .details-card {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 1.35rem;
 }
 
 .detail-field {
@@ -364,7 +375,7 @@ body {
 }
 
 .detail-title {
-  font-size: 1.35rem;
+  font-size: 1.45rem;
   font-weight: 700;
   color: var(--text-main);
 }
@@ -372,8 +383,8 @@ body {
 .detail-description {
   font-size: 0.95rem;
   color: var(--text-main);
-  background-color: #f8fafc;
-  padding: 0.75rem 1rem;
+  background-color: #f7fbf8;
+  padding: 0.85rem 1.1rem;
   border-radius: var(--radius-sm);
   border: 1px solid var(--border);
   white-space: pre-wrap;
@@ -402,7 +413,7 @@ body {
    ========================================================================== */
 .state-message {
   text-align: center;
-  padding: 2rem 1rem;
+  padding: 2.5rem 1rem;
   color: var(--text-muted);
   font-size: 0.95rem;
 }
@@ -417,10 +428,10 @@ body {
 
 .empty-state {
   text-align: center;
-  padding: 2.5rem 1rem;
+  padding: 2.75rem 1rem;
   background: var(--bg-card);
   border-radius: var(--radius-md);
-  border: 1px dashed var(--border);
+  border: 1.5px dashed var(--border);
   color: var(--text-muted);
 }
 
@@ -429,7 +440,7 @@ body {
    ========================================================================== */
 @media (max-width: 480px) {
   body {
-    padding: 1rem 0.5rem;
+    padding: 1.25rem 0.5rem;
   }
 
   .todo-actions {
@@ -439,7 +450,7 @@ body {
   }
 
   .todo-actions .btn {
-    padding: 0.45rem 0.5rem;
+    padding: 0.5rem 0.4rem;
     font-size: 0.8rem;
   }
 }
