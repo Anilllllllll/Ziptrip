@@ -1,0 +1,16 @@
+[
+  {
+    "id": 1,
+    "title": "Learn React",
+    "description": "Practice React components and routing",
+    "completed": false,
+    "createdAt": "2026-09-01T10:00:00.000Z"
+  },
+  {
+    "id": 2,
+    "title": "Learn Node.js",
+    "description": "Practice Express CRUD APIs",
+    "completed": false,
+    "createdAt": "2026-09-01T11:00:00.000Z"
+  }
+]
