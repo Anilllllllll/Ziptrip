@@ -77,7 +77,10 @@ function TodoDetails() {
   return (
     <div className="todo-details-page">
       <header className="page-header">
-        <h1>Ziptrip Todo Details</h1>
+        <div className="header-brand">
+          <img src="/logo.png" alt="Ziptrip Logo" className="brand-logo" />
+          <h1>Ziptrip Todo Details</h1>
+        </div>
       </header>
 
       {/* Loading State */}
