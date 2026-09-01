@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import TodoForm from '../components/TodoForm';
 import TodoItem from '../components/TodoItem';
 
-const API_URL = 'http://localhost:5000/api/todos';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/todos';
 
 function Todos() {
   const [todos, setTodos] = useState([]);

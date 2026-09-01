@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 
-const API_URL = 'http://localhost:5000/api/todos';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/todos';
 
 function TodoDetails() {
   const [searchParams] = useSearchParams();
