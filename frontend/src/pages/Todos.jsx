@@ -2,7 +2,21 @@ import React, { useState, useEffect } from 'react';
 import TodoForm from '../components/TodoForm';
 import TodoItem from '../components/TodoItem';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/todos';
+// Normalize API URL to handle with or without /api/todos or trailing slashes
+const getApiUrl = () => {
+  let raw = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/todos';
+  raw = raw.trim().replace(/\/+$/, '');
+  if (!raw.endsWith('/api/todos')) {
+    if (raw.endsWith('/api')) {
+      raw = `${raw}/todos`;
+    } else {
+      raw = `${raw}/api/todos`;
+    }
+  }
+  return raw;
+};
+
+const API_URL = getApiUrl();
 
 function Todos() {
   const [todos, setTodos] = useState([]);
@@ -22,9 +36,14 @@ function Todos() {
       }
 
       const data = await response.json();
-      setTodos(data);
+      if (Array.isArray(data)) {
+        setTodos(data);
+      } else {
+        setTodos([]);
+      }
     } catch (err) {
       setError('Failed to load todos.');
+      setTodos([]);
     } finally {
       setLoading(false);
     }
@@ -50,7 +69,7 @@ function Todos() {
       }
 
       const createdTodo = await response.json();
-      setTodos((prevTodos) => [...prevTodos, createdTodo]);
+      setTodos((prevTodos) => [...(Array.isArray(prevTodos) ? prevTodos : []), createdTodo]);
     } catch (err) {
       alert('Error creating todo. Please try again.');
     }
@@ -73,7 +92,7 @@ function Todos() {
 
       const updatedTodo = await response.json();
       setTodos((prevTodos) =>
-        prevTodos.map((todo) => (todo.id === id ? updatedTodo : todo))
+        (Array.isArray(prevTodos) ? prevTodos : []).map((todo) => (todo.id === id ? updatedTodo : todo))
       );
     } catch (err) {
       alert('Error updating todo. Please try again.');
@@ -94,14 +113,16 @@ function Todos() {
         throw new Error('Failed to delete todo');
       }
 
-      setTodos((prevTodos) => prevTodos.filter((todo) => todo.id !== id));
+      setTodos((prevTodos) => (Array.isArray(prevTodos) ? prevTodos : []).filter((todo) => todo.id !== id));
     } catch (err) {
       alert('Error deleting todo. Please try again.');
     }
   };
 
+  const todoList = Array.isArray(todos) ? todos : [];
+
   // Frontend filtering logic
-  const filteredTodos = todos.filter((todo) => {
+  const filteredTodos = todoList.filter((todo) => {
     if (filter === 'active') return !todo.completed;
     if (filter === 'completed') return todo.completed;
     return true; // 'all'
@@ -126,21 +147,21 @@ function Todos() {
           className={`filter-btn ${filter === 'all' ? 'active' : ''}`}
           onClick={() => setFilter('all')}
         >
-          All ({todos.length})
+          All ({todoList.length})
         </button>
         <button
           type="button"
           className={`filter-btn ${filter === 'active' ? 'active' : ''}`}
           onClick={() => setFilter('active')}
         >
-          Active ({todos.filter((t) => !t.completed).length})
+          Active ({todoList.filter((t) => !t.completed).length})
         </button>
         <button
           type="button"
           className={`filter-btn ${filter === 'completed' ? 'active' : ''}`}
           onClick={() => setFilter('completed')}
         >
-          Completed ({todos.filter((t) => t.completed).length})
+          Completed ({todoList.filter((t) => t.completed).length})
         </button>
       </div>
 

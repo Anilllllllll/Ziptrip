@@ -1,7 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/todos';
+// Normalize API URL to handle with or without /api/todos or trailing slashes
+const getApiUrl = () => {
+  let raw = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/todos';
+  raw = raw.trim().replace(/\/+$/, '');
+  if (!raw.endsWith('/api/todos')) {
+    if (raw.endsWith('/api')) {
+      raw = `${raw}/todos`;
+    } else {
+      raw = `${raw}/api/todos`;
+    }
+  }
+  return raw;
+};
+
+const API_URL = getApiUrl();
 
 function TodoDetails() {
   const [searchParams] = useSearchParams();
@@ -30,7 +44,11 @@ function TodoDetails() {
         }
 
         const data = await response.json();
-        setTodo(data);
+        if (data && typeof data === 'object' && !data.message) {
+          setTodo(data);
+        } else {
+          throw new Error('Todo not found.');
+        }
       } catch (err) {
         setError('Todo not found.');
       } finally {
