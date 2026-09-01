@@ -77,7 +77,7 @@ function TodoDetails() {
   return (
     <div className="todo-details-page">
       <header className="page-header">
-        <h1>Todo Details</h1>
+        <h1>Ziptrip Todo Details</h1>
       </header>
 
       {/* Loading State */}

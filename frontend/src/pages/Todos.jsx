@@ -131,7 +131,7 @@ function Todos() {
   return (
     <div className="todos-page">
       <header className="page-header">
-        <h1>My Todos</h1>
+        <h1>Ziptrip Todo Application</h1>
         <p className="page-subtitle">Organize and track your daily tasks</p>
       </header>
 
