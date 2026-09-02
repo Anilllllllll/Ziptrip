@@ -1,8 +1,11 @@
 # Ziptrip Todo Application
 
-A simple, clean, and interview-ready full-stack Todo application built with **React (Vite)** on the frontend and **Node.js (Express)** with **JSON file persistence** on the backend.
-
 ---
+<img width="1441" height="1090" alt="image" src="https://github.com/user-attachments/assets/eeed5459-e469-4e3f-b51e-da7b83b086c6" />
+
+<img width="1107" height="948" alt="image" src="https://github.com/user-attachments/assets/af43deac-e295-4b74-9d60-8d3f2dc035cf" />
+
+
 
 ## Table of Contents
 
@@ -14,8 +17,7 @@ A simple, clean, and interview-ready full-stack Todo application built with **Re
 6. [API Documentation](#api-documentation)
 7. [How to Run the Application](#how-to-run-the-application)
 8. [Data Storage Mechanism](#data-storage-mechanism)
-9. [Assumptions](#assumptions)
-10. [Interview Q&A Guide](#interview-qa-guide)
+
 
 ---
 
