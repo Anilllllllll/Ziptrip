@@ -104,8 +104,28 @@ function Todos() {
     fetchTodos(true);
   }, []);
 
-  // Create a new todo
+  // Create a new todo with 0ms instant optimistic UI update
   const handleCreateTodo = async (newTodoData) => {
+    // Generate an immediate local optimistic todo
+    const tempId = Date.now();
+    const optimisticTodo = {
+      id: tempId,
+      title: newTodoData.title,
+      description: newTodoData.description || '',
+      completed: false,
+      createdAt: new Date().toISOString()
+    };
+
+    // 1. Instantly update UI and localStorage
+    setTodos((prevTodos) => {
+      const list = Array.isArray(prevTodos) ? prevTodos : [];
+      const next = [...list, optimisticTodo];
+      updateLocalCache(next);
+      return next;
+    });
+    showNotification('Todo created successfully!', 'success');
+
+    // 2. Persist to server in background
     try {
       const response = await fetch(API_URL, {
         method: 'POST',
@@ -116,18 +136,21 @@ function Todos() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to create todo');
+        throw new Error('Failed to create todo on server');
       }
 
       const createdTodo = await response.json();
-      setTodos((prevTodos) => {
-        const next = [...(Array.isArray(prevTodos) ? prevTodos : []), createdTodo];
-        updateLocalCache(next);
-        return next;
-      });
-      showNotification('Todo created successfully!', 'success');
+      if (createdTodo && createdTodo.id) {
+        // Replace tempId with server ID
+        setTodos((prevTodos) => {
+          const list = Array.isArray(prevTodos) ? prevTodos : [];
+          const synced = list.map((t) => (t.id === tempId ? createdTodo : t));
+          updateLocalCache(synced);
+          return synced;
+        });
+      }
     } catch (err) {
-      alert('Error creating todo. Please check your connection.');
+      console.warn('Backend sync failed, saved in local cache:', err);
     }
   };
 
