@@ -16,13 +16,43 @@ const getApiUrl = () => {
 };
 
 const API_URL = getApiUrl();
+const CACHE_KEY = 'ziptrip_todos_cache';
 
 function TodoDetails() {
   const [searchParams] = useSearchParams();
   const id = searchParams.get('id');
 
-  const [todo, setTodo] = useState(null);
-  const [loading, setLoading] = useState(true);
+  // Load from cache initially for instant display
+  const [todo, setTodo] = useState(() => {
+    if (!id) return null;
+    try {
+      const cached = localStorage.getItem(CACHE_KEY);
+      if (cached) {
+        const list = JSON.parse(cached);
+        const match = Array.isArray(list) ? list.find((t) => String(t.id) === String(id)) : null;
+        return match || null;
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  });
+
+  const [loading, setLoading] = useState(() => {
+    if (!id) return false;
+    try {
+      const cached = localStorage.getItem(CACHE_KEY);
+      if (cached) {
+        const list = JSON.parse(cached);
+        const match = Array.isArray(list) ? list.find((t) => String(t.id) === String(id)) : null;
+        return !match;
+      }
+      return true;
+    } catch {
+      return true;
+    }
+  });
+
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -35,7 +65,7 @@ function TodoDetails() {
 
     const fetchTodoDetails = async () => {
       try {
-        setLoading(true);
+        if (!todo) setLoading(true);
         setError(null);
         const response = await fetch(`${API_URL}/${id}`);
 
@@ -50,7 +80,9 @@ function TodoDetails() {
           throw new Error('Todo not found.');
         }
       } catch (err) {
-        setError('Todo not found.');
+        if (!todo) {
+          setError('Todo not found.');
+        }
       } finally {
         setLoading(false);
       }
@@ -84,10 +116,10 @@ function TodoDetails() {
       </header>
 
       {/* Loading State */}
-      {loading && <div className="state-message">Loading todo...</div>}
+      {loading && !todo && <div className="state-message">Loading todo...</div>}
 
       {/* Error / Not Found State */}
-      {error && !loading && (
+      {error && !loading && !todo && (
         <div className="card state-message error-state">
           <p>{error}</p>
           <Link to="/todos" className="btn btn-secondary">
@@ -97,7 +129,7 @@ function TodoDetails() {
       )}
 
       {/* Todo Details Card */}
-      {!loading && !error && todo && (
+      {todo && (
         <div className="card details-card">
           <div className="detail-field">
             <span className="detail-label">Title</span>

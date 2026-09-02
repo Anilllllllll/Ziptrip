@@ -17,10 +17,30 @@ const getApiUrl = () => {
 };
 
 const API_URL = getApiUrl();
+const CACHE_KEY = 'ziptrip_todos_cache';
 
 function Todos() {
-  const [todos, setTodos] = useState([]);
-  const [loading, setLoading] = useState(true);
+  // Load initial state instantly from cache if available (0ms load time!)
+  const [todos, setTodos] = useState(() => {
+    try {
+      const cached = localStorage.getItem(CACHE_KEY);
+      return cached ? JSON.parse(cached) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const [loading, setLoading] = useState(() => {
+    // Only show full loading if we have no cached todos
+    try {
+      const cached = localStorage.getItem(CACHE_KEY);
+      return !cached || JSON.parse(cached).length === 0;
+    } catch {
+      return true;
+    }
+  });
+
+  const [isWakingUp, setIsWakingUp] = useState(false);
   const [error, setError] = useState(null);
   const [filter, setFilter] = useState('all'); // 'all' | 'active' | 'completed'
   const [notification, setNotification] = useState(null); // { message, type }
@@ -33,12 +53,31 @@ function Todos() {
     }, 3000);
   };
 
-  // Fetch all todos from the backend API
-  const fetchTodos = async () => {
+  // Helper to save todos to cache
+  const updateLocalCache = (data) => {
     try {
-      setLoading(true);
+      localStorage.setItem(CACHE_KEY, JSON.stringify(data));
+    } catch (e) {
+      // Ignore storage errors
+    }
+  };
+
+  // Fetch all todos from the backend API
+  const fetchTodos = async (isInitial = false) => {
+    // Timer to detect if Render free-tier server is in a cold start (>2.5s)
+    let wakeupTimer = setTimeout(() => {
+      setIsWakingUp(true);
+    }, 2500);
+
+    try {
+      if (isInitial && todos.length === 0) {
+        setLoading(true);
+      }
       setError(null);
       const response = await fetch(API_URL);
+
+      clearTimeout(wakeupTimer);
+      setIsWakingUp(false);
 
       if (!response.ok) {
         throw new Error('Failed to load todos.');
@@ -47,19 +86,22 @@ function Todos() {
       const data = await response.json();
       if (Array.isArray(data)) {
         setTodos(data);
-      } else {
-        setTodos([]);
+        updateLocalCache(data);
       }
     } catch (err) {
-      setError('Failed to load todos.');
-      setTodos([]);
+      clearTimeout(wakeupTimer);
+      setIsWakingUp(false);
+      // Only show blocking error if no cached data exists
+      if (todos.length === 0) {
+        setError('Failed to load todos from server.');
+      }
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchTodos();
+    fetchTodos(true);
   }, []);
 
   // Create a new todo
@@ -78,15 +120,34 @@ function Todos() {
       }
 
       const createdTodo = await response.json();
-      setTodos((prevTodos) => [...(Array.isArray(prevTodos) ? prevTodos : []), createdTodo]);
+      setTodos((prevTodos) => {
+        const next = [...(Array.isArray(prevTodos) ? prevTodos : []), createdTodo];
+        updateLocalCache(next);
+        return next;
+      });
       showNotification('Todo created successfully!', 'success');
     } catch (err) {
-      alert('Error creating todo. Please try again.');
+      alert('Error creating todo. Please check your connection.');
     }
   };
 
   // Toggle todo completed status (Complete / Undo)
   const handleToggleComplete = async (id, currentCompleted) => {
+    // Optimistic UI update for instant response
+    setTodos((prevTodos) => {
+      const updated = (Array.isArray(prevTodos) ? prevTodos : []).map((todo) =>
+        todo.id === id ? { ...todo, completed: !currentCompleted } : todo
+      );
+      updateLocalCache(updated);
+      return updated;
+    });
+
+    if (!currentCompleted) {
+      showNotification('Todo marked as completed!', 'success');
+    } else {
+      showNotification('Todo marked as active!', 'info');
+    }
+
     try {
       const response = await fetch(`${API_URL}/${id}`, {
         method: 'PUT',
@@ -97,21 +158,27 @@ function Todos() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to update todo');
+        throw new Error('Failed to update on server');
       }
 
-      const updatedTodo = await response.json();
-      setTodos((prevTodos) =>
-        (Array.isArray(prevTodos) ? prevTodos : []).map((todo) => (todo.id === id ? updatedTodo : todo))
-      );
-
-      if (!currentCompleted) {
-        showNotification('Todo marked as completed!', 'success');
-      } else {
-        showNotification('Todo marked as active!', 'info');
-      }
+      const serverUpdated = await response.json();
+      setTodos((prevTodos) => {
+        const synced = (Array.isArray(prevTodos) ? prevTodos : []).map((todo) =>
+          todo.id === id ? serverUpdated : todo
+        );
+        updateLocalCache(synced);
+        return synced;
+      });
     } catch (err) {
-      alert('Error updating todo. Please try again.');
+      // Revert if server update failed
+      setTodos((prevTodos) => {
+        const reverted = (Array.isArray(prevTodos) ? prevTodos : []).map((todo) =>
+          todo.id === id ? { ...todo, completed: currentCompleted } : todo
+        );
+        updateLocalCache(reverted);
+        return reverted;
+      });
+      alert('Error updating todo status on server.');
     }
   };
 
@@ -120,19 +187,28 @@ function Todos() {
     const confirmed = window.confirm('Are you sure you want to delete this todo?');
     if (!confirmed) return;
 
+    // Optimistic deletion for instant UI
+    const previousTodos = todos;
+    setTodos((prevTodos) => {
+      const filtered = (Array.isArray(prevTodos) ? prevTodos : []).filter((todo) => todo.id !== id);
+      updateLocalCache(filtered);
+      return filtered;
+    });
+    showNotification('Todo deleted successfully!', 'danger');
+
     try {
       const response = await fetch(`${API_URL}/${id}`, {
         method: 'DELETE'
       });
 
       if (!response.ok) {
-        throw new Error('Failed to delete todo');
+        throw new Error('Failed to delete on server');
       }
-
-      setTodos((prevTodos) => (Array.isArray(prevTodos) ? prevTodos : []).filter((todo) => todo.id !== id));
-      showNotification('Todo deleted successfully!', 'danger');
     } catch (err) {
-      alert('Error deleting todo. Please try again.');
+      // Revert on error
+      setTodos(previousTodos);
+      updateLocalCache(previousTodos);
+      alert('Error deleting todo on server.');
     }
   };
 
@@ -175,6 +251,14 @@ function Todos() {
         </div>
       )}
 
+      {/* Cold Start Server Status Alert */}
+      {isWakingUp && (
+        <div className="server-status-banner">
+          <span className="spinner-dot"></span>
+          <span>Connecting to free server (waking up, please hold on ~20s)...</span>
+        </div>
+      )}
+
       {/* Todo Creation Form */}
       <section className="card form-card">
         <TodoForm onSubmit={handleCreateTodo} />
@@ -205,20 +289,25 @@ function Todos() {
         </button>
       </div>
 
-      {/* Loading & Error States */}
-      {loading && <div className="state-message">Loading todos...</div>}
+      {/* Loading State (Only if no cached data) */}
+      {loading && todos.length === 0 && (
+        <div className="state-message">
+          <p>Loading todos...</p>
+        </div>
+      )}
 
-      {error && !loading && (
+      {/* Error State */}
+      {error && todos.length === 0 && (
         <div className="state-message error-state">
           <p>{error}</p>
-          <button type="button" className="btn btn-secondary" onClick={fetchTodos}>
+          <button type="button" className="btn btn-secondary" onClick={() => fetchTodos(true)}>
             Retry
           </button>
         </div>
       )}
 
       {/* Todo Items List */}
-      {!loading && !error && (
+      {(!loading || todos.length > 0) && (
         <div className="todos-list">
           {filteredTodos.length === 0 ? (
             <div className="empty-state">
