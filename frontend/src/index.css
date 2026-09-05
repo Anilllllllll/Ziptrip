@@ -370,6 +370,38 @@ body {
   border-color: var(--primary-soft);
 }
 
+.btn-edit {
+  background-color: #ecfdf5;
+  color: var(--primary-dark);
+  border-color: #a7f3d0;
+}
+
+.btn-edit:hover {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.btn-save {
+  background-color: var(--primary);
+  color: #ffffff;
+  border-color: var(--primary-dark);
+}
+
+.btn-save:hover {
+  background-color: var(--primary-hover);
+}
+
+.btn-cancel {
+  background-color: #f3f4f6;
+  color: #4b5563;
+  border-color: #e5e7eb;
+}
+
+.btn-cancel:hover {
+  background-color: #e5e7eb;
+  color: #1f2937;
+}
+
 .btn-delete {
   background-color: var(--danger-bg);
   color: var(--danger);
@@ -506,6 +538,63 @@ body {
   flex-wrap: wrap;
   padding-top: 0.65rem;
   border-top: 1px solid #eef6f1;
+}
+
+/* ==========================================================================
+   Inline Todo Editing Form
+   ========================================================================== */
+.todo-card-editing {
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15), var(--shadow-sm);
+  background-color: #ffffff;
+}
+
+.todo-edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  width: 100%;
+}
+
+.edit-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.edit-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--primary-dark);
+}
+
+.todo-edit-input,
+.todo-edit-textarea {
+  width: 100%;
+  padding: 0.65rem 0.85rem;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: 0.95rem;
+  color: var(--text-main);
+  background-color: #fbfdfc;
+  transition: all 0.2s ease;
+}
+
+.todo-edit-input:focus,
+.todo-edit-textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  background-color: #ffffff;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+}
+
+.todo-edit-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.4rem;
 }
 
 /* ==========================================================================

@@ -106,6 +106,87 @@ function TodoDetails() {
     }
   };
 
+  const [isEditing, setIsEditing] = useState(false);
+  const [editTitle, setEditTitle] = useState('');
+  const [editDescription, setEditDescription] = useState('');
+  const [notification, setNotification] = useState(null);
+
+  const showNotification = (message, type = 'success') => {
+    setNotification({ message, type });
+    setTimeout(() => {
+      setNotification((current) => (current && current.message === message ? null : current));
+    }, 3000);
+  };
+
+  const handleStartEdit = () => {
+    if (todo) {
+      setEditTitle(todo.title || '');
+      setEditDescription(todo.description || '');
+      setIsEditing(true);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    if (todo) {
+      setEditTitle(todo.title || '');
+      setEditDescription(todo.description || '');
+    }
+    setIsEditing(false);
+  };
+
+  const handleSaveEdit = async (e) => {
+    if (e) e.preventDefault();
+    if (!editTitle.trim()) {
+      alert('Title cannot be empty');
+      return;
+    }
+
+    const updatedData = {
+      title: editTitle.trim(),
+      description: editDescription.trim()
+    };
+
+    // 1. Optimistic local update
+    const updatedTodo = {
+      ...todo,
+      ...updatedData,
+      updatedAt: new Date().toISOString()
+    };
+    setTodo(updatedTodo);
+    setIsEditing(false);
+    showNotification('Todo updated successfully!', 'success');
+
+    // Update localStorage cache
+    try {
+      const cached = localStorage.getItem(CACHE_KEY);
+      if (cached) {
+        const list = JSON.parse(cached);
+        const nextList = list.map((t) => (String(t.id) === String(id) ? updatedTodo : t));
+        localStorage.setItem(CACHE_KEY, JSON.stringify(nextList));
+      }
+    } catch (e) {}
+
+    // 2. Persist to server
+    try {
+      const response = await fetch(`${API_URL}/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(updatedData)
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update todo on server');
+      }
+
+      const serverData = await response.json();
+      setTodo(serverData);
+    } catch (err) {
+      console.warn('Server sync error on details edit:', err);
+    }
+  };
+
   return (
     <div className="todo-details-page">
       <header className="page-header">
@@ -114,6 +195,23 @@ function TodoDetails() {
           <h1>Ziptrip Todo Details</h1>
         </div>
       </header>
+
+      {/* Notification Toast */}
+      {notification && (
+        <div className={`notification-toast toast-${notification.type}`}>
+          <div className="toast-content">
+            <span className="toast-icon">✓</span>
+            <span className="toast-text">{notification.message}</span>
+          </div>
+          <button
+            type="button"
+            className="toast-close"
+            onClick={() => setNotification(null)}
+          >
+            ×
+          </button>
+        </div>
+      )}
 
       {/* Loading State */}
       {loading && !todo && <div className="state-message">Loading todo...</div>}
@@ -129,7 +227,7 @@ function TodoDetails() {
       )}
 
       {/* Todo Details Card */}
-      {todo && (
+      {todo && !isEditing && (
         <div className="card details-card">
           <div className="detail-field">
             <span className="detail-label">Title</span>
@@ -162,10 +260,61 @@ function TodoDetails() {
           </div>
 
           <div className="details-actions">
+            <button
+              type="button"
+              className="btn btn-edit"
+              onClick={handleStartEdit}
+            >
+              Edit Task
+            </button>
             <Link to="/todos" className="btn btn-secondary">
               Back to Todos
             </Link>
           </div>
+        </div>
+      )}
+
+      {/* Todo Edit Card */}
+      {todo && isEditing && (
+        <div className="card details-card todo-card-editing">
+          <form onSubmit={handleSaveEdit} className="todo-edit-form">
+            <div className="edit-form-group">
+              <label className="edit-label">Title</label>
+              <input
+                type="text"
+                className="todo-edit-input"
+                value={editTitle}
+                onChange={(e) => setEditTitle(e.target.value)}
+                placeholder="Todo title..."
+                autoFocus
+                required
+              />
+            </div>
+
+            <div className="edit-form-group">
+              <label className="edit-label">Description</label>
+              <textarea
+                className="todo-edit-textarea"
+                value={editDescription}
+                onChange={(e) => setEditDescription(e.target.value)}
+                placeholder="Description (optional)..."
+                rows={3}
+              />
+            </div>
+
+            <div className="todo-edit-actions">
+              <button type="submit" className="btn btn-save">
+                Save Changes
+              </button>
+              <button
+                type="button"
+                className="btn btn-cancel"
+                onClick={handleCancelEdit}
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
         </div>
       )}
     </div>

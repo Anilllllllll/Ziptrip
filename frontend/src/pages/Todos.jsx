@@ -205,6 +205,50 @@ function Todos() {
     }
   };
 
+  // Update a todo title & description with 0ms optimistic UI update
+  const handleUpdateTodo = async (id, updatedFields) => {
+    const previousTodos = todos;
+
+    // 1. Instant optimistic update
+    setTodos((prevTodos) => {
+      const list = Array.isArray(prevTodos) ? prevTodos : [];
+      const updated = list.map((todo) =>
+        todo.id === id ? { ...todo, ...updatedFields, updatedAt: new Date().toISOString() } : todo
+      );
+      updateLocalCache(updated);
+      return updated;
+    });
+    showNotification('Todo updated successfully!', 'success');
+
+    // 2. Sync to server in background
+    try {
+      const response = await fetch(`${API_URL}/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(updatedFields)
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update todo on server');
+      }
+
+      const serverUpdated = await response.json();
+      setTodos((prevTodos) => {
+        const list = Array.isArray(prevTodos) ? prevTodos : [];
+        const synced = list.map((todo) => (todo.id === id ? serverUpdated : todo));
+        updateLocalCache(synced);
+        return synced;
+      });
+    } catch (err) {
+      // Revert if server update failed
+      setTodos(previousTodos);
+      updateLocalCache(previousTodos);
+      alert('Error updating todo on server.');
+    }
+  };
+
   // Delete a todo with browser confirmation
   const handleDeleteTodo = async (id) => {
     const confirmed = window.confirm('Are you sure you want to delete this todo?');
@@ -342,6 +386,7 @@ function Todos() {
                 key={todo.id}
                 todo={todo}
                 onToggle={handleToggleComplete}
+                onEdit={handleUpdateTodo}
                 onDelete={handleDeleteTodo}
               />
             ))
